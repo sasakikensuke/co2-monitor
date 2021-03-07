@@ -41,46 +41,16 @@ class CO2MINI(object):
     def read_data(self):
         try:
             data = list(self._file.read(8))
-            decrypted = self._decrypt(data)
 
-            # if decrypted[4] != 0x0D or (sum(decrypted[:3]) & 0xFF) != decrypted[3]:
             if data[4] != 0x0D or (sum(data[:3]) & 0xFF) != data[3]:
-                print(self._hd(data), " => ", self._hd(decrypted), "Checksum error")
+                print(self._hd(data), "Checksum error")
             else:
-                # operation = decrypted[0]
                 operation = data[0]
-                # val = decrypted[1] << 8 | decrypted[2]
                 val = data[1] << 8 | data[2]
                 self._values[operation] = val
             return True
         except:
             return False
-
-    def _decrypt(self, data):
-        cstate = [0x48, 0x74, 0x65, 0x6D, 0x70, 0x39, 0x39, 0x65]
-        shuffle = [2, 4, 0, 7, 1, 6, 5, 3]
-
-        phase1 = [0] * 8
-        for i, j in enumerate(shuffle):
-            phase1[j] = data[i]
-
-        phase2 = [0] * 8
-        for i in range(8):
-            phase2[i] = phase1[i] ^ self._key[i]
-
-        phase3 = [0] * 8
-        for i in range(8):
-            phase3[i] = ((phase2[i] >> 3) | (phase2[(i - 1 + 8) % 8] << 5)) & 0xFF
-
-        ctmp = [0] * 8
-        for i in range(8):
-            ctmp[i] = ((cstate[i] >> 4) | (cstate[i] << 4)) & 0xFF
-
-        out = [0] * 8
-        for i in range(8):
-            out[i] = (0x100 + phase3[i] - ctmp[i]) & 0xFF
-
-        return out
 
     @staticmethod
     def _hd(data):

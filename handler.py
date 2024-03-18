@@ -13,6 +13,11 @@ DEFAULT_INTERVAL_SECONDS = 600
 
 class Scheduler:
     def __init__(self, args):
+        """Scheduler Job Object.
+
+        Args:
+            args (argparse.Namespace): Namespace object containing command-line arguments.
+        """
         self._co2mini_sensor = CO2MINI()
         self._spread_sheet_client = SpreadSheet(
             args.key_path, args.spread_sheet_id
@@ -21,6 +26,8 @@ class Scheduler:
             self._spread_sheet_client.append_row(DEFAULT_COLUMNS)
 
     def monitoring_job(self):
+        """Retrieve data from CO2MINI and record in spreadsheet.
+        """
         current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self._co2mini_sensor.read_data()
         co2 = self._co2mini_sensor.get_co2()
@@ -34,6 +41,11 @@ class Scheduler:
 
 
 def main():
+    """The main function for initializing and running the scheduler.
+
+    This function uses argparse to parse command line arguments, sets up the script's configuration,
+    initializes a scheduler with provided arguments, and continuously runs it to execute pending jobs.
+    """
     parser = argparse.ArgumentParser(description="CO2 Sensor Script")
     parser.add_argument(
         "-s",
